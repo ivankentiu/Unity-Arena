@@ -1,17 +1,15 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using UnityEngine.UI;
-using UnityEngine.Assertions;
 using UnityEngine;
+using UnityEngine.Assertions;
+using UnityEngine.UI;
 
-public class PlayerHealth : MonoBehaviour
-{
-    [SerializeField]
-    private int startingHealth = 100;
-    [SerializeField]
-    private float timeSinceLastHit = 2f;
-    [SerializeField]
-    private Slider healthSlider;
+public class PlayerHealth : MonoBehaviour {
+
+    [SerializeField] int startingHealth = 100;
+    [SerializeField] float timeSinceLastHit = 2f;
+    [SerializeField] Slider healthSlider;
+    
     private float timer = 0f;
     private CharacterController characterController;
     private Animator anim;
@@ -19,85 +17,70 @@ public class PlayerHealth : MonoBehaviour
     private AudioSource audio;
     private ParticleSystem blood;
 
-    public int CurrentHealth
-    {
+    public int CurrentHealth {
         get { return currentHealth; }
-        set
-        {
-            if (value < 0)
+        set {
+            if (value < 0) {
                 currentHealth = 0;
-            else
+            } else {
                 currentHealth = value;
+            }
         }
     }
 
-    void Awake()
-    {
-        Assert.IsNotNull(healthSlider);
+    void Awake () {
+        Assert.IsNotNull (healthSlider);
     }
 
     // Use this for initialization
-    void Start()
-    {
-        anim = GetComponent<Animator>();
-        characterController = GetComponent<CharacterController>();
-        audio = GetComponent<AudioSource>();
-        blood = GetComponentInChildren<ParticleSystem>();
+    void Start () {
+        anim = GetComponent<Animator> ();
+        characterController = GetComponent<CharacterController> ();
+        audio = GetComponent<AudioSource> ();
+        blood = GetComponentInChildren<ParticleSystem> ();
         currentHealth = startingHealth;
     }
 
     // Update is called once per frame
-    void Update()
-    {
+    void Update () {
         timer += Time.deltaTime;
     }
 
-    void OnTriggerEnter(Collider other)
-    {
-        if (timer >= timeSinceLastHit && !GameManager.instance.GameOver)
-        {
-            if (other.tag == "Weapon")
-            {
-                takeHit();
+    void OnTriggerEnter (Collider other) {
+        if (timer >= timeSinceLastHit && !GameManager.instance.GameOver) {
+            if (other.tag == "Weapon" || other.tag == "Arrow") {
+                takeHit ();
                 timer = 0f;
             }
         }
     }
 
-    void takeHit()
-    {
-        if (currentHealth > 0)
-        {
-            GameManager.instance.PlayerHit(currentHealth);
-            anim.Play("Hurt");
+    void takeHit () {
+        if (currentHealth > 0) {
+            GameManager.instance.PlayerHit (currentHealth);
+            anim.Play ("Hurt");
             currentHealth -= 10;
             healthSlider.value = currentHealth;
-            audio.PlayOneShot(audio.clip);
-            blood.Play();
+            audio.PlayOneShot (audio.clip);
+            blood.Play ();
         }
 
-        if (currentHealth <= 0)
-        {
-            killPlayer();
+        if (currentHealth <= 0) {
+            killPlayer ();
         }
     }
 
-    void killPlayer()
-    {
-        GameManager.instance.PlayerHit(currentHealth);
-        anim.SetTrigger("HeroDie");
+    void killPlayer () {
+        GameManager.instance.PlayerHit (currentHealth);
+        anim.SetTrigger ("HeroDie");
         characterController.enabled = false;
-        blood.Play();
+        blood.Play ();
     }
 
-    public void PowerUpHealth()
-    {
-        if (currentHealth <= 70)
-        {
+    public void PowerUpHealth () {
+        if (currentHealth <= 70) {
             CurrentHealth += 30;
-        }
-        else if (currentHealth < startingHealth)
-        {
+        } else if (currentHealth < startingHealth) {
             CurrentHealth = startingHealth;
         }
         healthSlider.value = currentHealth;
